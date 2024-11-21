@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>HuyHoang.DotnetSocketCancelllation</RootNamespace>
+    <Nullable>enable</Nullable>
+    <AssemblyName>EchoServer</AssemblyName>
+    <TargetName>EchoServer</TargetName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.14.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
+    <PackageReference Include="System.IO.Pipelines" Version="9.0.0" />
+  </ItemGroup>
+
+</Project>
