@@ -9,7 +9,9 @@ namespace HuyHoang.DotnetSocketCancelllation;
 public sealed class CancellationTokenSession : Session
 {
     private readonly Socket socket;
-    private CancellationTokenSource cts = new CancellationTokenSource();
+    private CancellationTokenSource sendCts = new CancellationTokenSource();
+    private CancellationTokenSource recvCts = new CancellationTokenSource();
+
     // To detect redundant calls
     private bool disposedValue;
 
@@ -21,7 +23,7 @@ public sealed class CancellationTokenSession : Session
 
     protected override async ValueTask<TransportResult> RecvAsync(Socket socket, Memory<byte> buffer)
     {
-        var cts = this.GetCts();
+        var cts = this.GetRecvCts();
         try
         {
             var bytesReceived = await this.socket.ReceiveAsync(buffer, cts.Token);
@@ -35,7 +37,7 @@ public sealed class CancellationTokenSession : Session
 
     protected override async ValueTask<TransportResult> SendAsync(Socket socket, ReadOnlyMemory<byte> buffer)
     {
-        var cts = this.GetCts();
+        var cts = this.GetSendCts();
         try
         {
             var bytesSent = await this.socket.SendAsync(buffer, cts.Token);
@@ -47,17 +49,34 @@ public sealed class CancellationTokenSession : Session
         }
     }
 
-    private CancellationTokenSource GetCts()
+    private CancellationTokenSource GetSendCts()
     {
         CancellationTokenSource resultCts;
-        if (!this.cts.TryReset())
+        if (!this.sendCts.TryReset())
         {
-            this.cts.Dispose();
-            resultCts = this.cts = new CancellationTokenSource();
+            this.sendCts.Dispose();
+            resultCts = this.sendCts = new CancellationTokenSource();
         }
         else
         {
-            resultCts = this.cts;
+            resultCts = this.sendCts;
+        }
+
+        resultCts.CancelAfter(TimeSpan.FromMinutes(1));
+        return resultCts;
+    }
+
+    private CancellationTokenSource GetRecvCts()
+    {
+        CancellationTokenSource resultCts;
+        if (!this.recvCts.TryReset())
+        {
+            this.recvCts.Dispose();
+            resultCts = this.recvCts = new CancellationTokenSource();
+        }
+        else
+        {
+            resultCts = this.recvCts;
         }
 
         resultCts.CancelAfter(TimeSpan.FromMinutes(1));
@@ -70,7 +89,8 @@ public sealed class CancellationTokenSession : Session
         {
             if (disposing)
             {
-                this.cts.Dispose();
+                this.sendCts.Dispose();
+                this.recvCts.Dispose();
             }
 
             disposedValue = true;
